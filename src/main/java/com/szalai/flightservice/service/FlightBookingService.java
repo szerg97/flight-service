@@ -2,6 +2,7 @@ package com.szalai.flightservice.service;
 
 import com.szalai.flightservice.controller.FlightBookingRequest;
 import com.szalai.flightservice.controller.FlightBookingResponse;
+import com.szalai.flightservice.exception.InsufficientFundsException;
 import com.szalai.flightservice.model.PassengerInfo;
 import com.szalai.flightservice.model.PaymentInfo;
 import com.szalai.flightservice.repository.PassengerInfoRepository;
@@ -21,15 +22,17 @@ public class FlightBookingService {
         this.paymentInfoRepository = paymentInfoRepository;
     }
 
-    @Transactional
+    @Transactional(rollbackFor = {InsufficientFundsException.class})
     public FlightBookingResponse bookFlight(FlightBookingRequest request){
         PassengerInfo passengerInfo = request.passengerInfo();
+        PaymentInfo paymentInfo = request.paymentInfo();
+
         passengerInfoRepository.save(passengerInfo);
 
-        PaymentInfo paymentInfo = request.paymentInfo();
         PaymentUtils.validateCreditLimit(
                 paymentInfo.getAccountNumber(),
                 passengerInfo.getFare());
+
         paymentInfo.setPassengerId(passengerInfo.getId());
         paymentInfo.setAmount(passengerInfo.getFare());
         paymentInfoRepository.save(paymentInfo);

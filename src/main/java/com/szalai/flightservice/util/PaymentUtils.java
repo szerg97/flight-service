@@ -1,5 +1,7 @@
 package com.szalai.flightservice.util;
 
+import com.szalai.flightservice.exception.InsufficientFundsException;
+
 import java.util.HashMap;
 import java.util.Map;
 
@@ -16,7 +18,7 @@ public class PaymentUtils {
 
     public static boolean validateCreditLimit(String accNo, double amount){
         if (amount > paymentMap.get(accNo)){
-            throw new IllegalStateException("Insufficient found on account " + accNo + "(" + paymentMap.get(accNo) + ")");
+            throw new InsufficientFundsException("Insufficient found on account " + accNo + "(" + paymentMap.get(accNo) + ")");
         }
         return true;
     }
